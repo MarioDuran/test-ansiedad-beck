@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   ClipboardList,
   ArrowRight,
@@ -95,7 +95,9 @@ async function apiRequest(path, options = {}, token = null) {
 }
 
 export default function App() {
-  const [currentView, setCurrentView] = useState('demographics');
+  const [currentView, setCurrentView] = useState(() => {
+    return window.location.pathname === '/admin' ? 'admin' : 'demographics';
+  });
   const [currentUser, setCurrentUser] = useState({ edad: '', carrera: '' });
   const [answers, setAnswers] = useState({});
   const [error, setError] = useState('');
@@ -118,6 +120,13 @@ export default function App() {
     const weighted = stats.reduce((acc, item) => acc + item.average_score * item.count, 0);
     return { total, average: total ? weighted / total : 0 };
   }, [stats]);
+
+  const goHome = () => {
+    window.history.pushState({}, '', '/');
+    setCurrentView('demographics');
+    setError('');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleDemographicsChange = (e) => {
     let { name, value } = e.target;
@@ -190,8 +199,7 @@ export default function App() {
     setAnswers({});
     setError('');
     setLastRecord(null);
-    setCurrentView('demographics');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    goHome();
   };
 
   const loadAdminData = async (authToken = token, period = statsPeriod) => {
@@ -245,6 +253,22 @@ export default function App() {
     setStatsPeriod(period);
     if (token) await loadAdminData(token, period);
   };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      setCurrentView(window.location.pathname === '/admin' ? 'admin' : 'demographics');
+      setError('');
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useEffect(() => {
+    if (currentView === 'admin' && token && records.length === 0 && stats.length === 0) {
+      loadAdminData(token);
+    }
+  }, [currentView, token]);
 
   const renderDemographics = () => (
     <div className="max-w-md mx-auto bg-white p-8 sm:p-10 rounded-[2rem] shadow-xl shadow-blue-900/5 border border-slate-100 relative overflow-hidden">
@@ -355,7 +379,7 @@ export default function App() {
             <p className="text-slate-500 font-medium">Registros recientes: <strong className="text-slate-800">{records.length}</strong></p>
           </div>
           <div className="flex flex-wrap gap-3 w-full lg:w-auto">
-            <button onClick={() => setCurrentView('demographics')} className="flex-1 lg:flex-none bg-slate-100 text-slate-700 font-bold py-3 px-5 rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"><ChevronLeft size={20} /> Volver</button>
+            <button onClick={goHome} className="flex-1 lg:flex-none bg-slate-100 text-slate-700 font-bold py-3 px-5 rounded-xl hover:bg-slate-200 transition-colors flex items-center justify-center gap-2"><ChevronLeft size={20} /> Volver</button>
             <button onClick={() => loadAdminData()} disabled={isAdminLoading} className="flex-1 lg:flex-none bg-blue-600 text-white font-bold py-3 px-5 rounded-xl hover:bg-blue-700 transition-colors disabled:opacity-60 flex items-center justify-center gap-2"><Database size={20} /> Actualizar</button>
             <button onClick={logout} className="flex-1 lg:flex-none bg-red-50 text-red-700 font-bold py-3 px-5 rounded-xl hover:bg-red-100 transition-colors flex items-center justify-center gap-2"><LogOut size={20} /> Salir</button>
           </div>
@@ -386,12 +410,11 @@ export default function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50/50 text-slate-900 font-sans selection:bg-blue-200 selection:text-blue-900 pb-12">
       <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm shadow-slate-200/20">
-        <div className="max-w-6xl mx-auto px-3 sm:px-6 min-h-16 sm:h-20 flex items-center justify-between gap-3">
+        <div className="max-w-6xl mx-auto px-3 sm:px-6 min-h-16 sm:h-20 flex items-center justify-center gap-3">
           <div className="flex items-center gap-2 sm:gap-3 text-blue-600 select-none max-w-full">
             <div className="bg-blue-600 text-white p-2 rounded-xl shrink-0"><ClipboardList size={26} strokeWidth={2.5} /></div>
             <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-slate-800 leading-tight">Prueba de Ansiedad de BECK</span>
           </div>
-          <button onClick={() => { setCurrentView(currentView === 'admin' ? 'demographics' : 'admin'); setError(''); }} className="text-xs sm:text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 sm:px-4 py-2 rounded-xl transition-colors">Admin</button>
         </div>
       </header>
       <main className="max-w-6xl mx-auto px-3 sm:px-4 py-6 sm:py-12">
