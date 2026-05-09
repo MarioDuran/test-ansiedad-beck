@@ -23,10 +23,10 @@ services:
       - key: ADMIN_PASSWORD
         sync: false
       - key: CORS_ORIGINS
-        value: https://beck-frontend.onrender.com
+        value: https://test-ansiedad-beck.onrender.com
 
   - type: web
-    name: beck-frontend
+    name: test-ansiedad-beck
     runtime: static
     rootDir: frontend
     buildCommand: npm install && npm run build
