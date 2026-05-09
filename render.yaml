@@ -29,15 +29,15 @@ services:
     name: test-ansiedad-beck
     runtime: static
     rootDir: frontend
-    buildCommand: npm cache clean --force && npm ci --no-audit --no-fund --cache /tmp/npm-cache && npm run build
+    buildCommand: corepack enable && corepack prepare pnpm@9.15.9 --activate && pnpm install --prod=false --no-frozen-lockfile && pnpm run build
     staticPublishPath: ./dist
     envVars:
       - key: SKIP_INSTALL_DEPS
         value: true
       - key: NODE_VERSION
         value: 20.19.5
-      - key: NPM_CONFIG_CACHE
-        value: /tmp/npm-cache
+      - key: COREPACK_ENABLE_DOWNLOAD_PROMPT
+        value: "0"
       - key: VITE_API_URL
         value: https://beck-api.onrender.com
     routes:
