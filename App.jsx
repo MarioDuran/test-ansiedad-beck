@@ -448,7 +448,6 @@ export default function App() {
             <input type="checkbox" name="es_estudiante_tec" checked={currentUser.es_estudiante_tec} onChange={handleDemographicsChange} className="h-5 w-5 accent-blue-600 shrink-0" />
             <div>
               <div className="font-extrabold text-slate-800">Estudiante del Tec</div>
-              <div className="text-xs text-slate-500 font-medium">{currentUser.es_estudiante_tec ? 'Se solicitará semestre.' : 'Al desactivar esta opción, se registra como Personal del Tec.'}</div>
             </div>
           </label>
           {!currentUser.es_estudiante_tec && (
