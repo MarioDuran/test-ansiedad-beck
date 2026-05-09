@@ -29,11 +29,11 @@ services:
     name: test-ansiedad-beck
     runtime: static
     rootDir: frontend
-    buildCommand: npm install && npm run build
+    buildCommand: npm ci --no-audit --no-fund && npm run build
     staticPublishPath: ./dist
     envVars:
       - key: NODE_VERSION
-        value: 22.22.0
+        value: 20.19.5
       - key: VITE_API_URL
         value: https://beck-api.onrender.com
     routes:
